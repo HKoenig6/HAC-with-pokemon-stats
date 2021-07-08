@@ -6,11 +6,6 @@ This tuple is organized in a list of the first 20 pokemon in the example, instan
 where base is where the range begins in the pokedex, up to 721 and
 offset is the defined range after the base.
 
-Tweak the numbers in the example under
-	if __name__ == "__main__":
-to see the plots of other pokemon and their
-related clusters. 
-
 HAC will organize and build a tree to represent each
 data point's relationship to another, and imshow is used to neatly plot
 the data. The primary challenge in this assignment was to implement HAC
