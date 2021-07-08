@@ -4,14 +4,15 @@ import scipy.cluster.hierarchy as sp
 import numpy as np
 import random as rnd
 import matplotlib.pyplot as plt
+import sys
 
 def load_data(filepath):
-    data = [{} for x in range(200)]
+    data = [{} for x in range(721)]
     with open(filepath, 'r', encoding='utf-8') as csvFile:
         reader = csv.DictReader(csvFile)
-        i = 0   #increments to 20
+        i = 0
         for row in reader:
-            if (i == 200):
+            if (i == 721):
                 break
             data[i]['#'] = int(row['#'])
             data[i]['Name'] = row['Name']
@@ -173,8 +174,16 @@ def imshow_helper(cluster_set, row, m, indices):
     return indices
 
 if __name__=="__main__": #example simulation
+    if len(sys.argv) < 3:
+        print("Usage: python3 ./pokemon_stats.py <base> <offset>")
+        exit()
+    numPokemon = int(sys.argv[1])
+    offset = int(sys.argv[2])
+    if numPokemon + offset > 721:
+        print("Error: base + offset is too big!")
+        exit()
     dataset = load_data("Pokemon.csv")
-    stats = [i for i in range(20)]
-    for j in range(20):
-        stats[j] = calculate_x_y(dataset[j])
+    stats = [i for i in range(offset)]
+    for j in range(offset):
+        stats[j] = calculate_x_y(dataset[j+numPokemon])
     imshow_hac(stats)
