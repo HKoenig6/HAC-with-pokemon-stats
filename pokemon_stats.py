@@ -1,3 +1,5 @@
+#Author: Hans Koenig
+
 import csv
 import math
 import scipy.cluster.hierarchy as sp
@@ -6,6 +8,11 @@ import random as rnd
 import matplotlib.pyplot as plt
 import sys
 
+"""
+load_data:
+organizes pokemon stats into a list of dictionaries
+that will be interpreted in the methods below.
+"""
 def load_data(filepath):
     data = [{} for x in range(721)]
     with open(filepath, 'r', encoding='utf-8') as csvFile:
@@ -28,11 +35,32 @@ def load_data(filepath):
             i = i + 1
     return data
 
+"""
+calculate_x_y:
+a formula used to sum the relevant stats that represent
+the pokemon's total attack and defense, returned as a tuple.
+"""
 def calculate_x_y(stats):
     x = stats['Attack'] + stats['Sp. Atk'] + stats['Speed']
     y = stats['Defense'] + stats['Sp. Def'] + stats['HP']
     return (x, y)
 
+"""
+hac:
+the main method for performing heirarchical agglomerative 
+clustering; the tree builds from the bottom up, and the
+matrix result is constructed in a way such that the
+information can be easily referred to recursively, specifically
+in imshow_helper below.
+The algorithm is as follows:
+   -If the data point is a leaf (data points very close to
+    each other), assign an index to the leaf and its predecessor.
+   -If a data point is not a leaf, its index is represented by
+    the index of its child +dataset range, represented by m
+    (allows for recursive interpretation later)
+   -A tie case regarding equidistant points arbitrarily chooses
+    one connection over the other; this could be improved on further.
+"""
 def hac(dataset):
     dataset = [i for i in dataset if not math.isnan(i[0]) and math.isfinite(i[0]) 
         and not math.isnan(i[1]) and math.isfinite(i[1])]
@@ -114,12 +142,23 @@ def hac(dataset):
 
     return np.matrix(cluster)
 
+"""
+random_x_y:
+a debugging method to test the breadth of the program.
+Returns a list identical in structure to the one returned by
+load_data.
+"""
 def random_x_y(m):
     rand_list = [None for x in range(m)]
     for i in range(m):
         rand_list[i] = (rnd.randint(1, 359), rnd.randint(1, 359))
     return rand_list
-
+"""
+imshow_hac:
+plots the points in dataset by cascading
+up, plotting the lower points first then joining each
+point with a line to make the data more readable.
+"""
 def imshow_hac(dataset):
     cluster_set = hac(dataset)
     m = len(cluster_set) + 1
@@ -160,6 +199,25 @@ def imshow_hac(dataset):
     plt.show()
     return None
 
+"""
+imshow_helper:
+a recursive method that terminates
+when a leaf in the tree is identified.
+All indices are stored in a separate
+list for imshow_hac to display
+in the correct order.
+The method works as follows:
+   -if either index in a row is less than
+   the range, add this index to the list.
+   -if either index in a row is greater or equal to
+   the range, reduce the index by subtracting
+   the index by range, and run imshow_helper with the
+   new indices.
+To clarify, the list of indices represents the proper row
+of point relationship in dataset. This makes it easy to
+iterate through indices and draw points in the correct
+order.
+"""
 def imshow_helper(cluster_set, row, m, indices):
     n1 = int(cluster_set[row, 0])
     n2 = int(cluster_set[row, 1])
@@ -173,6 +231,12 @@ def imshow_helper(cluster_set, row, m, indices):
         indices = imshow_helper(cluster_set, n2 - m, m, indices)
     return indices
 
+"""
+Driver for handling custom user input based around
+the base and offset in Pokemon.csv. Allows the user to
+test every range in the dataset and observe the
+relations involved through imshow.
+"""
 if __name__=="__main__": #example simulation
     if len(sys.argv) < 3:
         print("Usage: python3 ./pokemon_stats.py <base> <offset>")
